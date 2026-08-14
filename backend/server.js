@@ -14,7 +14,7 @@ app.get("/", (req, res) => {
 // GET /students-return all students from mysql
 app.get("/students", (req, res) => {
     const sql = "SELECT * FROM students";
-    db,query(mysql,(error, results) => {
+    db.query(sql,(error, results) => {
         if(error){
             console.error("error getting students:", error);
             return res.status(500).json({error: "failed to get students"});
@@ -33,4 +33,38 @@ app.get("/classes",(req, res) => {
         }
         res.json(results);
     });
+});
+
+//GET/enrollments-return joins data(student name + class name)//
+app.get("/enrollments", (req, res) => {
+    const sql = "SELECT students.first_name, students.last_name, classes.class_name, classes.teacher_name FROM enrollments JOIN students ON enrollments.student_id = students.id JOIN classes ON enrollments.class_id = classes.id";
+    db.query(sql, (error, results) => {
+        if(error) {
+            console.error("error getting enrollments", error);
+            return res.status(500).json({error: "failed to get enrollment"});
+        }
+        res.json(results);
+    });
+});
+
+// GET /students/:id- returns one student by id
+app.get("/students/:id", (req, res) => {
+    const {id} = req.params;
+    const sql = "SELECT * FROM students WHERE id = ?";
+    db.query(sql, [id],(error, results) => {
+        if(error) {
+            console.error("error getting student", error);
+            return res.status(500).json({error: "failed to get students"});
+        }
+        if(results.lenght === 0) {
+            return res.status(404).json({error: "students not found"});
+        }
+        res.json(results[0]);
+    });
+});
+
+// GET /students/:id/grades- returns grades from one student
+
+app.listen(PORT, () => {
+    console.log (`Server running at http://localhost:${PORT}`);
 });
